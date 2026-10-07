@@ -5,20 +5,93 @@ import { Button, Card, Badge, LoadingSpinner, EmptyState } from '../../component
 import { enrollmentsApi } from '../../api';
 import toast from 'react-hot-toast';
 
-const MOCK_ENROLLMENT = {
-  id: '1',
-  status: 'active',
-  premium_amount: 25000,
-  effective_date: '2026-01-01',
-  expiry_date: '2026-12-31',
-  member_first_name: 'Adaeze',
-  member_last_name: 'Okonkwo',
-  member_number: 'MBR-20261001-1000',
-  member_phone: '+234-801-2345678',
-  plan_name: 'Standard Care Plan',
-  plan_premium: 25000,
-  coverage_limit: 1500000,
-  employer_name: 'TechNova Nigeria Ltd',
+const MOCK_ENROLLMENTS_MAP = {
+  '1': {
+    id: '1',
+    status: 'active',
+    premium_amount: 25000,
+    effective_date: '2026-01-01',
+    expiry_date: '2026-12-31',
+    member_first_name: 'Adaeze',
+    member_last_name: 'Okonkwo',
+    member_number: 'MBR-001',
+    member_phone: '+234-801-2345678',
+    plan_name: 'Standard Care Plan',
+    plan_premium: 25000,
+    coverage_limit: 1500000,
+    employer_name: 'TechNova Nigeria Ltd',
+  },
+  '2': {
+    id: '2',
+    status: 'active',
+    premium_amount: 15000,
+    effective_date: '2026-03-01',
+    expiry_date: '2027-02-28',
+    member_first_name: 'Emeka',
+    member_last_name: 'Eze',
+    member_number: 'MBR-002',
+    member_phone: '+234-802-3456789',
+    plan_name: 'Basic Care Plan',
+    plan_premium: 15000,
+    coverage_limit: 500000,
+    employer_name: 'First Bank Nigeria PLC',
+  },
+  '3': {
+    id: '3',
+    status: 'suspended',
+    premium_amount: 45000,
+    effective_date: '2025-06-01',
+    expiry_date: '2026-05-31',
+    member_first_name: 'Fatima',
+    member_last_name: 'Abubakar',
+    member_number: 'MBR-003',
+    member_phone: '+234-803-4567890',
+    plan_name: 'Premium Care Plan',
+    plan_premium: 45000,
+    coverage_limit: 5000000,
+    employer_name: 'Dangote Group',
+  },
+  '4': {
+    id: '4',
+    status: 'terminated',
+    premium_amount: 25000,
+    effective_date: '2024-01-01',
+    expiry_date: '2024-12-31',
+    member_first_name: 'Ngozi',
+    member_last_name: 'Ibe',
+    member_number: 'MBR-004',
+    member_phone: '+234-804-5678901',
+    plan_name: 'Standard Care Plan',
+    plan_premium: 25000,
+    coverage_limit: 1500000,
+    employer_name: 'TechNova Nigeria Ltd',
+    termination_reason: 'Voluntary employment termination',
+  },
+};
+
+// Index by 'enr-1', etc.
+Object.keys(MOCK_ENROLLMENTS_MAP).forEach(k => {
+  MOCK_ENROLLMENTS_MAP[`enr-${k}`] = MOCK_ENROLLMENTS_MAP[k];
+});
+
+const getFallbackEnrollment = (id) => {
+  const cleanId = String(id || '1').replace('enr-', '');
+  if (MOCK_ENROLLMENTS_MAP[cleanId]) return MOCK_ENROLLMENTS_MAP[cleanId];
+  return {
+    id: id || '1',
+    status: 'active',
+    premium_amount: 25000,
+    effective_date: '2026-01-01',
+    expiry_date: '2026-12-31',
+    member_first_name: 'Member',
+    member_last_name: `#${id}`,
+    member_number: `MBR-00${id}`,
+    member_phone: '+234 800 000 0000',
+    plan_name: 'Standard Care Plan',
+    plan_premium: 25000,
+    coverage_limit: 1500000,
+    employer_name: 'Individual / Direct',
+  };
 };
 
 const fmtDate = d => d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
@@ -32,16 +105,17 @@ export default function EnrollmentDetail() {
 
   useEffect(() => {
     setLoading(true);
+    const fallback = getFallbackEnrollment(id);
     enrollmentsApi.getById(id)
       .then((res) => {
         const e = res.data?.data || res.data;
         if (e && (e.member_first_name || e.plan_name || e.status)) {
           setEnrollment(e);
         } else {
-          setEnrollment({ ...MOCK_ENROLLMENT, id });
+          setEnrollment(fallback);
         }
       })
-      .catch(() => setEnrollment({ ...MOCK_ENROLLMENT, id }))
+      .catch(() => setEnrollment(fallback))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -69,7 +143,8 @@ export default function EnrollmentDetail() {
     );
   }
 
-  const e = enrollment || MOCK_ENROLLMENT;
+  const fallback = getFallbackEnrollment(id);
+  const e = enrollment || fallback;
   const memberName = `${e.member_first_name || ''} ${e.member_last_name || ''}`.trim() || 'Enrolled Member';
 
   return (
@@ -108,7 +183,7 @@ export default function EnrollmentDetail() {
               </div>
               <div>
                 <dt className="text-xs text-gray-500 uppercase tracking-wide">Member Number</dt>
-                <dd className="font-mono text-sm font-semibold text-blue-600 mt-0.5">{e.member_number || 'MBR-20261001-1000'}</dd>
+                <dd className="font-mono text-sm font-semibold text-blue-600 mt-0.5">{e.member_number || 'MBR-001'}</dd>
               </div>
               <div>
                 <dt className="text-xs text-gray-500 uppercase tracking-wide">Phone Number</dt>
@@ -153,6 +228,12 @@ export default function EnrollmentDetail() {
               <dt className="text-xs text-gray-500 uppercase tracking-wide">Expiry Date</dt>
               <dd className="font-medium text-gray-800 mt-1">{fmtDate(e.expiry_date)}</dd>
             </div>
+            {e.termination_reason && (
+              <div className="sm:col-span-3">
+                <dt className="text-xs text-gray-500 uppercase tracking-wide">Termination Notes</dt>
+                <dd className="text-red-600 font-medium mt-1">{e.termination_reason}</dd>
+              </div>
+            )}
           </div>
         </Card>
       </div>

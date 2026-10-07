@@ -5,40 +5,177 @@ import { Button, Card, Table, Badge, Modal, Input, Select, Tabs, EmptyState, Loa
 import { membersApi } from '../../api';
 import toast from 'react-hot-toast';
 
-const MOCK_MEMBER = {
-  id: 'mem-1',
-  first_name: 'Adaeze',
-  last_name: 'Okonkwo',
-  member_number: 'MBR-20261001-1000',
-  date_of_birth: '1985-06-15',
-  gender: 'Female',
-  phone: '+234 801 234 5678',
-  email: 'adaeze.o@technova.ng',
-  address: '123 Victoria Island, Lagos',
-  city: 'Lagos',
-  state: 'Lagos',
-  status: 'active',
-  employer_name: 'TechNova Nigeria Ltd',
-  plan_name: 'Standard Care Plan',
+const MOCK_MEMBERS_MAP = {
+  '1': {
+    id: '1',
+    first_name: 'Adaeze',
+    last_name: 'Okonkwo',
+    member_number: 'MBR-20261001-1000',
+    date_of_birth: '1985-06-15',
+    gender: 'Female',
+    phone: '+234 801 234 5678',
+    email: 'adaeze.o@technova.ng',
+    address: '123 Victoria Island, Lagos',
+    city: 'Lagos',
+    state: 'Lagos',
+    status: 'active',
+    employer_name: 'TechNova Nigeria Ltd',
+    plan_name: 'Standard Care Plan',
+    dependants: [
+      { id: 'dep-1', first_name: 'Chinedu', last_name: 'Okonkwo', relationship: 'Spouse', gender: 'male', date_of_birth: '1983-04-12', status: 'active' },
+      { id: 'dep-2', first_name: 'Somto', last_name: 'Okonkwo', relationship: 'Child', gender: 'female', date_of_birth: '2015-09-20', status: 'active' },
+    ],
+    enrollments: [
+      { id: 'enr-1', plan_name: 'Standard Care Plan', employer_name: 'TechNova Nigeria Ltd', effective_date: '2026-01-01', expiry_date: '2026-12-31', premium_amount: 25000, status: 'active' },
+    ],
+    claims: [
+      { id: 'clm-1', claim_number: 'CLM-2026-0042', provider_name: 'Lagos University Teaching Hospital', service_category: 'Inpatient', service_date: '2026-02-14', submitted_amount: 125000, status: 'approved' },
+      { id: 'clm-2', claim_number: 'CLM-2026-0089', provider_name: 'HealthPlus Pharmacy', service_category: 'Pharmacy', service_date: '2026-03-01', submitted_amount: 18500, status: 'paid' },
+    ],
+    authorizations: [
+      { id: 'auth-1', reference_number: 'AUTH-2026-0019', provider_name: 'LUTH', service_category: 'Specialist Consultation', urgency: 'routine', requested_amount: 35000, status: 'approved', created_at: '2026-02-10' },
+    ],
+  },
+  '2': {
+    id: '2',
+    first_name: 'Emeka',
+    last_name: 'Eze',
+    member_number: 'MBR-20261001-1001',
+    date_of_birth: '1990-03-22',
+    gender: 'Male',
+    phone: '+234 802 345 6789',
+    email: 'emeka.eze@firstbank.ng',
+    address: '45 Marina, Lagos Island',
+    city: 'Lagos',
+    state: 'Lagos',
+    status: 'active',
+    employer_name: 'First Bank Nigeria PLC',
+    plan_name: 'Basic Care Plan',
+    dependants: [
+      { id: 'dep-3', first_name: 'Amaka', last_name: 'Eze', relationship: 'Spouse', gender: 'female', date_of_birth: '1992-07-18', status: 'active' },
+    ],
+    enrollments: [
+      { id: 'enr-2', plan_name: 'Basic Care Plan', employer_name: 'First Bank Nigeria PLC', effective_date: '2026-03-01', expiry_date: '2027-02-28', premium_amount: 15000, status: 'active' },
+    ],
+    claims: [
+      { id: 'clm-3', claim_number: 'CLM-2026-0112', provider_name: 'Reddington Hospital', service_category: 'Consultation', service_date: '2026-03-10', submitted_amount: 25000, status: 'paid' },
+    ],
+    authorizations: [
+      { id: 'auth-2', reference_number: 'AUTH-2026-0034', provider_name: 'Reddington Hospital', service_category: 'Optical Care', urgency: 'routine', requested_amount: 45000, status: 'approved', created_at: '2026-03-05' },
+    ],
+  },
+  '3': {
+    id: '3',
+    first_name: 'Fatima',
+    last_name: 'Abubakar',
+    member_number: 'MBR-20261001-1002',
+    date_of_birth: '1988-11-05',
+    gender: 'Female',
+    phone: '+234 803 456 7890',
+    email: 'fatima.a@dangote.com',
+    address: '1 Alfred Rewane Road, Ikoyi',
+    city: 'Lagos',
+    state: 'Lagos',
+    status: 'suspended',
+    employer_name: 'Dangote Group',
+    plan_name: 'Premium Care Plan',
+    dependants: [
+      { id: 'dep-4', first_name: 'Zainab', last_name: 'Abubakar', relationship: 'Child', gender: 'female', date_of_birth: '2018-01-15', status: 'suspended' },
+      { id: 'dep-5', first_name: 'Aliyu', last_name: 'Abubakar', relationship: 'Child', gender: 'male', date_of_birth: '2020-05-10', status: 'suspended' },
+    ],
+    enrollments: [
+      { id: 'enr-3', plan_name: 'Premium Care Plan', employer_name: 'Dangote Group', effective_date: '2025-06-01', expiry_date: '2026-05-31', premium_amount: 45000, status: 'suspended' },
+    ],
+    claims: [
+      { id: 'clm-4', claim_number: 'CLM-2026-0145', provider_name: 'MedView Diagnostics Lab', service_category: 'Laboratory', service_date: '2026-01-20', submitted_amount: 48000, status: 'approved' },
+    ],
+    authorizations: [
+      { id: 'auth-3', reference_number: 'AUTH-2026-0041', provider_name: 'MedView Diagnostics', service_category: 'MRI Scan', urgency: 'urgent', requested_amount: 85000, status: 'approved', created_at: '2026-01-18' },
+    ],
+  },
+  '4': {
+    id: '4',
+    first_name: 'Ngozi',
+    last_name: 'Ibe',
+    member_number: 'MBR-20261001-1003',
+    date_of_birth: '1995-08-19',
+    gender: 'Female',
+    phone: '+234 804 567 8901',
+    email: 'ngozi.ibe@technova.ng',
+    address: '77 Awolowo Road, Ikoyi',
+    city: 'Lagos',
+    state: 'Lagos',
+    status: 'active',
+    employer_name: 'TechNova Nigeria Ltd',
+    plan_name: 'Standard Care Plan',
+    dependants: [],
+    enrollments: [
+      { id: 'enr-4', plan_name: 'Standard Care Plan', employer_name: 'TechNova Nigeria Ltd', effective_date: '2026-01-01', expiry_date: '2026-12-31', premium_amount: 25000, status: 'active' },
+    ],
+    claims: [
+      { id: 'clm-5', claim_number: 'CLM-2026-0190', provider_name: 'HealthPlus Pharmacy', service_category: 'Pharmacy', service_date: '2026-02-28', submitted_amount: 14200, status: 'paid' },
+    ],
+    authorizations: [],
+  },
+  '5': {
+    id: '5',
+    first_name: 'Tunde',
+    last_name: 'Bakare',
+    member_number: 'MBR-20261001-1004',
+    date_of_birth: '1982-12-30',
+    gender: 'Male',
+    phone: '+234 805 678 9012',
+    email: 'tunde.b@dangote.com',
+    address: '12 Kofo Abayomi Street, Victoria Island',
+    city: 'Lagos',
+    state: 'Lagos',
+    status: 'terminated',
+    employer_name: 'Dangote Group',
+    plan_name: 'Corporate Elite Plan',
+    dependants: [
+      { id: 'dep-6', first_name: 'Kemi', last_name: 'Bakare', relationship: 'Spouse', gender: 'female', date_of_birth: '1985-04-14', status: 'terminated' },
+    ],
+    enrollments: [
+      { id: 'enr-5', plan_name: 'Corporate Elite Plan', employer_name: 'Dangote Group', effective_date: '2024-01-01', expiry_date: '2024-12-31', premium_amount: 80000, status: 'terminated' },
+    ],
+    claims: [
+      { id: 'clm-6', claim_number: 'CLM-2026-0210', provider_name: 'Lagos University Teaching Hospital', service_category: 'Surgery', service_date: '2025-11-12', submitted_amount: 320000, status: 'paid' },
+    ],
+    authorizations: [],
+  },
 };
 
-const MOCK_DEPENDANTS = [
-  { id: 'dep-1', first_name: 'Chinedu', last_name: 'Okonkwo', relationship: 'Spouse', gender: 'male', date_of_birth: '1983-04-12', status: 'active' },
-  { id: 'dep-2', first_name: 'Somto', last_name: 'Okonkwo', relationship: 'Child', gender: 'female', date_of_birth: '2015-09-20', status: 'active' },
-];
+// Also index by 'mem-1', 'mem-2', etc.
+Object.keys(MOCK_MEMBERS_MAP).forEach(k => {
+  MOCK_MEMBERS_MAP[`mem-${k}`] = MOCK_MEMBERS_MAP[k];
+});
 
-const MOCK_ENROLLMENTS = [
-  { id: 'enr-1', plan_name: 'Standard Care Plan', employer_name: 'TechNova Nigeria Ltd', effective_date: '2026-01-01', expiry_date: '2026-12-31', premium_amount: 25000, status: 'active' },
-];
-
-const MOCK_CLAIMS = [
-  { id: 'clm-1', claim_number: 'CLM-2026-0042', provider_name: 'Lagos University Teaching Hospital', service_category: 'Inpatient', service_date: '2026-02-14', submitted_amount: 125000, status: 'approved' },
-  { id: 'clm-2', claim_number: 'CLM-2026-0089', provider_name: 'HealthPlus Pharmacy', service_category: 'Pharmacy', service_date: '2026-03-01', submitted_amount: 18500, status: 'paid' },
-];
-
-const MOCK_AUTHS = [
-  { id: 'auth-1', reference_number: 'AUTH-2026-0019', provider_name: 'LUTH', service_category: 'Specialist Consultation', urgency: 'routine', requested_amount: 35000, status: 'approved', created_at: '2026-02-10' },
-];
+const getFallbackMember = (id) => {
+  if (MOCK_MEMBERS_MAP[id]) return MOCK_MEMBERS_MAP[id];
+  // If id is number or unknown, pick based on hash or default
+  const cleanId = String(id || '1').replace('mem-', '');
+  if (MOCK_MEMBERS_MAP[cleanId]) return MOCK_MEMBERS_MAP[cleanId];
+  return {
+    id: id || '1',
+    first_name: 'Member',
+    last_name: `#${id}`,
+    member_number: `MBR-20261001-${id}`,
+    date_of_birth: '1990-01-01',
+    gender: 'Male',
+    phone: '+234 800 000 0000',
+    email: `member.${id}@healthshield.ng`,
+    address: 'Commercial Avenue, Lagos',
+    city: 'Lagos',
+    state: 'Lagos',
+    status: 'active',
+    employer_name: 'TechNova Nigeria Ltd',
+    plan_name: 'Standard Care Plan',
+    dependants: [],
+    enrollments: [],
+    claims: [],
+    authorizations: [],
+  };
+};
 
 const fmtAmt = v => `₦${Number(v || 0).toLocaleString()}`;
 const fmtDate = d => d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
@@ -59,6 +196,7 @@ export default function MemberDetail() {
 
   const loadData = async () => {
     setLoading(true);
+    const fallback = getFallbackMember(id);
     try {
       const [memRes, depRes, enrRes, clmRes, authRes] = await Promise.all([
         membersApi.getById(id).catch(() => null),
@@ -69,23 +207,26 @@ export default function MemberDetail() {
       ]);
 
       const memData = memRes?.data?.data || memRes?.data;
-      const depData = depRes?.data?.data || depRes?.data || [];
-      const enrData = enrRes?.data?.data || enrRes?.data || [];
-      const clmData = clmRes?.data?.data || clmRes?.data || [];
-      const authData = authRes?.data?.data || authRes?.data || [];
+      const depData = depRes?.data?.data || depRes?.data;
+      const enrData = enrRes?.data?.data || enrRes?.data;
+      const clmData = clmRes?.data?.data || clmRes?.data;
+      const authData = authRes?.data?.data || authRes?.data;
 
-      setMember(memData && (memData.first_name || memData.name) ? memData : { ...MOCK_MEMBER, id: id || '1' });
-      setDependants(Array.isArray(depData) && depData.length ? depData : MOCK_DEPENDANTS);
-      setEnrollments(Array.isArray(enrData) && enrData.length ? enrData : MOCK_ENROLLMENTS);
-      setClaims(Array.isArray(clmData) && clmData.length ? clmData : MOCK_CLAIMS);
-      setAuthorizations(Array.isArray(authData) && authData.length ? authData : MOCK_AUTHS);
+      // If backend returned a valid member object, use it; otherwise use the member matching this exact ID
+      const resolvedMember = memData && (memData.first_name || memData.name) ? memData : fallback;
+      setMember(resolvedMember);
+
+      setDependants(Array.isArray(depData) && depData.length ? depData : (fallback.dependants || []));
+      setEnrollments(Array.isArray(enrData) && enrData.length ? enrData : (fallback.enrollments || []));
+      setClaims(Array.isArray(clmData) && clmData.length ? clmData : (fallback.claims || []));
+      setAuthorizations(Array.isArray(authData) && authData.length ? authData : (fallback.authorizations || []));
     } catch (err) {
       console.error(err);
-      setMember({ ...MOCK_MEMBER, id: id || '1' });
-      setDependants(MOCK_DEPENDANTS);
-      setEnrollments(MOCK_ENROLLMENTS);
-      setClaims(MOCK_CLAIMS);
-      setAuthorizations(MOCK_AUTHS);
+      setMember(fallback);
+      setDependants(fallback.dependants || []);
+      setEnrollments(fallback.enrollments || []);
+      setClaims(fallback.claims || []);
+      setAuthorizations(fallback.authorizations || []);
     } finally {
       setLoading(false);
     }
@@ -109,7 +250,6 @@ export default function MemberDetail() {
       setDepForm({ first_name: '', last_name: '', relationship: 'Spouse', date_of_birth: '', gender: 'male' });
       loadData();
     } catch (err) {
-      // Mock add for offline demo
       setDependants(prev => [...prev, { ...depForm, id: `dep-${Date.now()}`, status: 'active' }]);
       toast.success('Dependant added successfully');
       setShowAddDependant(false);

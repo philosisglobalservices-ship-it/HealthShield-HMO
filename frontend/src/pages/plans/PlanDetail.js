@@ -18,24 +18,98 @@ const BENEFIT_CATEGORIES = [
   { value: 'specialist', label: 'Specialist' },
 ];
 
-const MOCK_PLAN = {
-  id: '1',
-  name: 'Standard Care Plan',
-  plan_type: 'individual',
-  status: 'active',
-  premium_amount: 25000,
-  coverage_limit: 1500000,
-  waiting_period_days: 90,
-  min_age: 0,
-  max_age: 65,
-  description: 'Comprehensive healthcare coverage for individuals and growing families across Nigeria.',
-  benefits: [
-    { id: '1', service_category: 'outpatient', service_name: 'General Consultation & Primary Care', benefit_type: 'percentage', coverage_percentage: 100, annual_limit: 200000, requires_authorization: false },
-    { id: '2', service_category: 'inpatient', service_name: 'Hospital Ward & Nursing Care', benefit_type: 'percentage', coverage_percentage: 80, annual_limit: 800000, requires_authorization: true },
-    { id: '3', service_category: 'pharmacy', service_name: 'Prescribed Formulary Drugs', benefit_type: 'fixed', fixed_amount: 50000, annual_limit: 100000, requires_authorization: false },
-    { id: '4', service_category: 'laboratory', service_name: 'Routine Lab Diagnostics & Blood Work', benefit_type: 'percentage', coverage_percentage: 100, annual_limit: 150000, requires_authorization: false },
-    { id: '5', service_category: 'surgery', service_name: 'Minor & Intermediate Surgical Procedures', benefit_type: 'percentage', coverage_percentage: 85, annual_limit: 600000, requires_authorization: true },
-  ],
+const MOCK_PLANS_MAP = {
+  '1': {
+    id: '1',
+    name: 'Basic Care',
+    plan_type: 'individual',
+    status: 'active',
+    premium_amount: 15000,
+    coverage_limit: 500000,
+    waiting_period_days: 30,
+    min_age: 0,
+    max_age: 65,
+    description: 'Essential primary healthcare coverage for individuals covering general consultations and basic medications.',
+    benefits: [
+      { id: 'b1', service_category: 'outpatient', service_name: 'General Practitioner Consultation', benefit_type: 'percentage', coverage_percentage: 100, annual_limit: 100000, requires_authorization: false },
+      { id: 'b2', service_category: 'pharmacy', service_name: 'Prescribed Basic Formulary Drugs', benefit_type: 'fixed', fixed_amount: 25000, annual_limit: 50000, requires_authorization: false },
+      { id: 'b3', service_category: 'laboratory', service_name: 'Routine Lab Tests (Malaria, Blood Sugar, PCV)', benefit_type: 'percentage', coverage_percentage: 100, annual_limit: 50000, requires_authorization: false },
+    ],
+  },
+  '2': {
+    id: '2',
+    name: 'Standard Care',
+    plan_type: 'individual',
+    status: 'active',
+    premium_amount: 25000,
+    coverage_limit: 1500000,
+    waiting_period_days: 90,
+    min_age: 0,
+    max_age: 65,
+    description: 'Comprehensive healthcare coverage for individuals and growing families across Nigeria.',
+    benefits: [
+      { id: 'b4', service_category: 'outpatient', service_name: 'General Consultation & Primary Care', benefit_type: 'percentage', coverage_percentage: 100, annual_limit: 200000, requires_authorization: false },
+      { id: 'b5', service_category: 'inpatient', service_name: 'Hospital Ward & Nursing Care', benefit_type: 'percentage', coverage_percentage: 80, annual_limit: 800000, requires_authorization: true },
+      { id: 'b6', service_category: 'pharmacy', service_name: 'Prescribed Formulary Drugs', benefit_type: 'fixed', fixed_amount: 50000, annual_limit: 100000, requires_authorization: false },
+      { id: 'b7', service_category: 'laboratory', service_name: 'Routine Lab Diagnostics & Blood Work', benefit_type: 'percentage', coverage_percentage: 100, annual_limit: 150000, requires_authorization: false },
+      { id: 'b8', service_category: 'surgery', service_name: 'Minor & Intermediate Surgical Procedures', benefit_type: 'percentage', coverage_percentage: 85, annual_limit: 600000, requires_authorization: true },
+    ],
+  },
+  '3': {
+    id: '3',
+    name: 'Premium Care',
+    plan_type: 'family',
+    status: 'active',
+    premium_amount: 45000,
+    coverage_limit: 5000000,
+    waiting_period_days: 60,
+    min_age: 0,
+    max_age: 70,
+    description: 'Full-spectrum healthcare with comprehensive hospital, surgical, and specialist care.',
+    benefits: [
+      { id: 'b9', service_category: 'outpatient', service_name: 'Specialist & Consultant Care', benefit_type: 'percentage', coverage_percentage: 100, annual_limit: 500000, requires_authorization: false },
+      { id: 'b10', service_category: 'inpatient', service_name: 'Private Room Hospitalization', benefit_type: 'percentage', coverage_percentage: 100, annual_limit: 2500000, requires_authorization: true },
+      { id: 'b11', service_category: 'surgery', service_name: 'Major Surgical Procedures', benefit_type: 'percentage', coverage_percentage: 90, annual_limit: 2000000, requires_authorization: true },
+      { id: 'b12', service_category: 'maternity', service_name: 'Normal & Caesarean Delivery Care', benefit_type: 'fixed', fixed_amount: 350000, annual_limit: 500000, requires_authorization: true },
+      { id: 'b13', service_category: 'dental', service_name: 'Comprehensive Dental & Optical Care', benefit_type: 'fixed', fixed_amount: 150000, annual_limit: 250000, requires_authorization: false },
+    ],
+  },
+  '4': {
+    id: '4',
+    name: 'Corporate Elite',
+    plan_type: 'group',
+    status: 'active',
+    premium_amount: 80000,
+    coverage_limit: 10000000,
+    waiting_period_days: 0,
+    min_age: 0,
+    max_age: 75,
+    description: 'Executive-level coverage tailored for corporate enterprises with zero waiting period.',
+    benefits: [
+      { id: 'b14', service_category: 'outpatient', service_name: 'VIP Specialist Access & Telemedicine', benefit_type: 'percentage', coverage_percentage: 100, annual_limit: 1000000, requires_authorization: false },
+      { id: 'b15', service_category: 'inpatient', service_name: 'Executive Suite Hospitalization', benefit_type: 'percentage', coverage_percentage: 100, annual_limit: 5000000, requires_authorization: true },
+      { id: 'b16', service_category: 'surgery', service_name: 'Complex Surgery & Intensive Care (ICU)', benefit_type: 'percentage', coverage_percentage: 100, annual_limit: 4000000, requires_authorization: true },
+      { id: 'b17', service_category: 'optical', service_name: 'Annual Optical Allowance & Frames', benefit_type: 'fixed', fixed_amount: 100000, annual_limit: 150000, requires_authorization: false },
+    ],
+  },
+};
+
+const getFallbackPlan = (id) => {
+  const cleanId = String(id || '2').replace('plan-', '');
+  if (MOCK_PLANS_MAP[cleanId]) return MOCK_PLANS_MAP[cleanId];
+  return {
+    id: id || '2',
+    name: `Health Plan #${id}`,
+    plan_type: 'individual',
+    status: 'active',
+    premium_amount: 25000,
+    coverage_limit: 1500000,
+    waiting_period_days: 90,
+    min_age: 0,
+    max_age: 65,
+    description: 'Custom health plan policy.',
+    benefits: MOCK_PLANS_MAP['2'].benefits,
+  };
 };
 
 const BLANK_BENEFIT = {
@@ -58,19 +132,20 @@ export default function PlanDetail() {
 
   useEffect(() => {
     setLoading(true);
+    const fallback = getFallbackPlan(id);
     plansApi.getById(id)
       .then(res => {
         const p = res.data?.data || res.data;
         if (p && p.name) {
           setPlan({
             ...p,
-            benefits: p.benefits && p.benefits.length ? p.benefits : MOCK_PLAN.benefits,
+            benefits: p.benefits && p.benefits.length ? p.benefits : (fallback.benefits || []),
           });
         } else {
-          setPlan({ ...MOCK_PLAN, id });
+          setPlan(fallback);
         }
       })
-      .catch(() => setPlan({ ...MOCK_PLAN, id }))
+      .catch(() => setPlan(fallback))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -111,7 +186,8 @@ export default function PlanDetail() {
     );
   }
 
-  const p = plan || MOCK_PLAN;
+  const fallback = getFallbackPlan(id);
+  const p = plan || fallback;
 
   const benefitCols = [
     { header: 'Service Category', accessor: row => <span className="capitalize font-medium text-gray-800">{row.service_category}</span> },

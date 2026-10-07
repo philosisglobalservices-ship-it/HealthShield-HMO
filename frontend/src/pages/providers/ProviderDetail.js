@@ -5,39 +5,154 @@ import { Button, Card, Table, Badge, Tabs, LoadingSpinner, EmptyState } from '..
 import { providersApi } from '../../api';
 import toast from 'react-hot-toast';
 
-const MOCK_PROVIDER = {
-  id: 'p1',
-  name: 'Lagos University Teaching Hospital',
-  provider_type: 'hospital',
-  tier: 'Tier 1',
-  license_number: 'MFH-LA-2019-00124',
-  accreditation_number: 'NHIA-2020-0456',
-  address: 'Ishaga Road, Idi-Araba',
-  city: 'Surulere',
-  state: 'Lagos',
-  phone: '+234-1-8765432',
-  email: 'claims@luth.gov.ng',
-  contact_person: 'Dr. Funmi Adeyemi',
-  bank_name: 'First Bank',
-  account_number: '1029384756',
-  account_name: 'LUTH Operations Account',
-  status: 'active',
-  locations: [
-    { id: 'l1', name: 'Main Campus Hospital', address: 'Ishaga Road, Idi-Araba', city: 'Surulere', phone: '+234-1-8765432', is_primary: true },
-    { id: 'l2', name: 'Annex Specialist Clinic', address: '5 Herbert Macaulay Way', city: 'Yaba', phone: '+234-1-3456789', is_primary: false },
-  ],
+const MOCK_PROVIDERS_MAP = {
+  '1': {
+    id: '1',
+    name: 'Lagos University Teaching Hospital',
+    provider_type: 'hospital',
+    tier: 'Tier 1',
+    license_number: 'MFH-LA-2019-00124',
+    accreditation_number: 'NHIA-2020-0456',
+    address: 'Ishaga Road, Idi-Araba',
+    city: 'Surulere',
+    state: 'Lagos',
+    phone: '+234-1-8765432',
+    email: 'claims@luth.gov.ng',
+    contact_person: 'Dr. Funmi Adeyemi',
+    bank_name: 'First Bank',
+    account_number: '1029384756',
+    account_name: 'LUTH Operations Account',
+    status: 'active',
+    locations: [
+      { id: 'l1', name: 'Main Campus Teaching Hospital', address: 'Ishaga Road, Idi-Araba', city: 'Surulere', phone: '+234-1-8765432', is_primary: true },
+      { id: 'l2', name: 'Specialist Outreach Annex', address: '5 Herbert Macaulay Way', city: 'Yaba', phone: '+234-1-3456789', is_primary: false },
+    ],
+    claims: [
+      { id: 'c1', claim_number: 'CLM-2026-0042', member_name: 'Adaeze Okonkwo', service_category: 'Inpatient', submitted_amount: 125000, status: 'approved', service_date: '2026-02-14' },
+      { id: 'c6', claim_number: 'CLM-2026-0210', member_name: 'Tunde Bakare', service_category: 'Surgery', submitted_amount: 320000, status: 'paid', service_date: '2025-11-12' },
+    ],
+    settlements: [
+      { id: 's1', settlement_number: 'SET-2026-001', period: 'January 2026', claims_count: 34, gross_amount: 2850000, deductions: 285000, net_amount: 2565000, status: 'paid' },
+      { id: 's2', settlement_number: 'SET-2026-002', period: 'February 2026', claims_count: 41, gross_amount: 3120000, deductions: 312000, net_amount: 2808000, status: 'pending' },
+    ],
+  },
+  '2': {
+    id: '2',
+    name: 'Reddington Hospital',
+    provider_type: 'hospital',
+    tier: 'Tier 1',
+    license_number: 'MFH-LA-2018-00911',
+    accreditation_number: 'NHIA-2020-0782',
+    address: '12 Idowu Martins Street',
+    city: 'Victoria Island',
+    state: 'Lagos',
+    phone: '+234-1-2715340',
+    email: 'hmo@reddingtonhospital.com',
+    contact_person: 'Dr. Charles Adeleke',
+    bank_name: 'Zenith Bank',
+    account_number: '2039485761',
+    account_name: 'Reddington Multi-Specialist Hospital',
+    status: 'active',
+    locations: [
+      { id: 'l3', name: 'Victoria Island Main Facility', address: '12 Idowu Martins St', city: 'Victoria Island', phone: '+234-1-2715340', is_primary: true },
+      { id: 'l4', name: 'Lekki Medical Clinic', address: 'Plot 4, Admiralty Way, Lekki', city: 'Lekki', phone: '+234-1-2715355', is_primary: false },
+    ],
+    claims: [
+      { id: 'c3', claim_number: 'CLM-2026-0112', member_name: 'Emeka Eze', service_category: 'Consultation', submitted_amount: 25000, status: 'paid', service_date: '2026-03-10' },
+    ],
+    settlements: [
+      { id: 's3', settlement_number: 'SET-2026-003', period: 'February 2026', claims_count: 22, gross_amount: 4500000, deductions: 450000, net_amount: 4050000, status: 'paid' },
+    ],
+  },
+  '3': {
+    id: '3',
+    name: 'HealthPlus Pharmacy',
+    provider_type: 'pharmacy',
+    tier: 'Tier 2',
+    license_number: 'PCN-LA-2017-00312',
+    accreditation_number: 'NHIA-2021-0119',
+    address: '15 Commercial Avenue, Sabo',
+    city: 'Yaba',
+    state: 'Lagos',
+    phone: '+234-809-1234567',
+    email: 'dispensary@healthplus.com.ng',
+    contact_person: 'Pharm. Bukola Shonowo',
+    bank_name: 'GTBank',
+    account_number: '0123456789',
+    account_name: 'HealthPlus Pharmacy Chain',
+    status: 'active',
+    locations: [
+      { id: 'l5', name: 'Yaba Flagship Dispensary', address: '15 Commercial Ave, Sabo', city: 'Yaba', phone: '+234-809-1234567', is_primary: true },
+      { id: 'l6', name: 'Ikeja Mall Branch', address: 'Ikeja City Mall, Alausa', city: 'Ikeja', phone: '+234-809-1234568', is_primary: false },
+    ],
+    claims: [
+      { id: 'c2', claim_number: 'CLM-2026-0089', member_name: 'Adaeze Okonkwo', service_category: 'Pharmacy', submitted_amount: 18500, status: 'paid', service_date: '2026-03-01' },
+      { id: 'c5', claim_number: 'CLM-2026-0190', member_name: 'Ngozi Ibe', service_category: 'Pharmacy', submitted_amount: 14200, status: 'paid', service_date: '2026-02-28' },
+    ],
+    settlements: [
+      { id: 's4', settlement_number: 'SET-2026-004', period: 'February 2026', claims_count: 55, gross_amount: 1850000, deductions: 92500, net_amount: 1757500, status: 'paid' },
+    ],
+  },
+  '4': {
+    id: '4',
+    name: 'MedView Diagnostics Lab',
+    provider_type: 'laboratory',
+    tier: 'Tier 3',
+    license_number: 'MLSCN-2016-00441',
+    accreditation_number: 'NHIA-2021-0301',
+    address: '44 Isaac John Street, GRA',
+    city: 'Ikeja',
+    state: 'Lagos',
+    phone: '+234-1-4970000',
+    email: 'lab@medview.ng',
+    contact_person: 'Dr. Obinna Nwankwo',
+    bank_name: 'Access Bank',
+    account_number: '0987654321',
+    account_name: 'MedView Diagnostic Services Ltd',
+    status: 'active',
+    locations: [
+      { id: 'l7', name: 'Ikeja Central Laboratories', address: '44 Isaac John St, GRA', city: 'Ikeja', phone: '+234-1-4970000', is_primary: true },
+    ],
+    claims: [
+      { id: 'c4', claim_number: 'CLM-2026-0145', member_name: 'Fatima Abubakar', service_category: 'Laboratory', submitted_amount: 48000, status: 'approved', service_date: '2026-01-20' },
+    ],
+    settlements: [
+      { id: 's5', settlement_number: 'SET-2026-005', period: 'January 2026', claims_count: 18, gross_amount: 980000, deductions: 49000, net_amount: 931000, status: 'paid' },
+    ],
+  },
 };
 
-const MOCK_CLAIMS = [
-  { id: 'c1', claim_number: 'CLM-2024-0112', member_name: 'Adaeze Okonkwo', service_category: 'Inpatient', submitted_amount: 185000, status: 'approved', service_date: '2026-02-14' },
-  { id: 'c2', claim_number: 'CLM-2024-0156', member_name: 'Emeka Eze', service_category: 'Surgery', submitted_amount: 450000, status: 'paid', service_date: '2026-03-01' },
-  { id: 'c3', claim_number: 'CLM-2024-0201', member_name: 'Fatima Abubakar', service_category: 'Outpatient', submitted_amount: 35000, status: 'submitted', service_date: '2026-03-15' },
-];
+// Also index by 'p1', 'p2', 'prv-1', etc.
+Object.keys(MOCK_PROVIDERS_MAP).forEach(k => {
+  MOCK_PROVIDERS_MAP[`p${k}`] = MOCK_PROVIDERS_MAP[k];
+  MOCK_PROVIDERS_MAP[`prv-${k}`] = MOCK_PROVIDERS_MAP[k];
+});
 
-const MOCK_SETTLEMENTS = [
-  { id: 's1', settlement_number: 'SET-2026-001', period: 'January 2026', claims_count: 34, gross_amount: 2850000, deductions: 285000, net_amount: 2565000, status: 'paid' },
-  { id: 's2', settlement_number: 'SET-2026-002', period: 'February 2026', claims_count: 41, gross_amount: 3120000, deductions: 312000, net_amount: 2808000, status: 'pending' },
-];
+const getFallbackProvider = (id) => {
+  const cleanId = String(id || '1').replace('prv-', '').replace('p', '');
+  if (MOCK_PROVIDERS_MAP[cleanId]) return MOCK_PROVIDERS_MAP[cleanId];
+  return {
+    id: id || '1',
+    name: `Healthcare Provider #${id}`,
+    provider_type: 'hospital',
+    tier: 'Tier 1',
+    license_number: `NHIA-LIC-${id}`,
+    accreditation_number: `NHIA-ACCR-${id}`,
+    address: 'Medical Way, Lagos',
+    city: 'Lagos',
+    state: 'Lagos',
+    phone: '+234 800 000 0000',
+    email: `provider.${id}@healthshield.ng`,
+    contact_person: 'Medical Director',
+    bank_name: 'First Bank',
+    account_number: '1029384756',
+    account_name: `Healthcare Provider #${id}`,
+    status: 'active',
+    locations: [],
+    claims: [],
+    settlements: [],
+  };
+};
 
 const DetailRow = ({ label, value }) => (
   <div>
@@ -57,35 +172,36 @@ export default function ProviderDetail() {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
+      const fallback = getFallbackProvider(id);
       try {
         const res = await providersApi.getById(id);
         const p = res.data?.data || res.data;
         if (p && p.name) {
           setProvider({
             ...p,
-            locations: p.locations && p.locations.length ? p.locations : MOCK_PROVIDER.locations,
+            locations: p.locations && p.locations.length ? p.locations : (fallback.locations || []),
           });
         } else {
-          setProvider({ ...MOCK_PROVIDER, id });
+          setProvider(fallback);
         }
       } catch {
-        setProvider({ ...MOCK_PROVIDER, id });
+        setProvider(fallback);
       }
 
       try {
         const cRes = await providersApi.getClaims(id);
-        const cData = cRes.data?.data?.data || cRes.data?.data || [];
-        setClaims(cData.length ? cData : MOCK_CLAIMS);
+        const cData = cRes.data?.data?.data || cRes.data?.data;
+        setClaims(Array.isArray(cData) && cData.length ? cData : (fallback.claims || []));
       } catch {
-        setClaims(MOCK_CLAIMS);
+        setClaims(fallback.claims || []);
       }
 
       try {
         const sRes = await providersApi.getSettlements(id);
-        const sData = sRes.data?.data?.data || sRes.data?.data || [];
-        setSettlements(sData.length ? sData : MOCK_SETTLEMENTS);
+        const sData = sRes.data?.data?.data || sRes.data?.data;
+        setSettlements(Array.isArray(sData) && sData.length ? sData : (fallback.settlements || []));
       } catch {
-        setSettlements(MOCK_SETTLEMENTS);
+        setSettlements(fallback.settlements || []);
       }
       setLoading(false);
     };
@@ -138,40 +254,35 @@ export default function ProviderDetail() {
     );
   }
 
-  if (!provider) {
-    return (
-      <Layout title="Provider Details">
-        <EmptyState title="Provider not found" description="This healthcare provider record could not be loaded." />
-      </Layout>
-    );
-  }
+  const fallback = getFallbackProvider(id);
+  const p = provider || fallback;
 
   const detailsContent = (
     <div className="space-y-6">
       <Card title="Provider Information">
         <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <DetailRow label="Facility Name" value={provider.name} />
+          <DetailRow label="Facility Name" value={p.name} />
           <DetailRow
             label="Facility Type"
-            value={provider.provider_type ? provider.provider_type.charAt(0).toUpperCase() + provider.provider_type.slice(1) : 'Hospital'}
+            value={p.provider_type ? p.provider_type.charAt(0).toUpperCase() + p.provider_type.slice(1) : 'Hospital'}
           />
-          <DetailRow label="Empanelment Tier" value={String(provider.tier || 'Tier 1')} />
-          <DetailRow label="License Number" value={provider.license_number || 'NHIA-LIC-2024'} />
-          <DetailRow label="NHIA Accreditation" value={provider.accreditation_number || 'NHIA-ACCR-889'} />
-          <DetailRow label="Status" value={<Badge status={provider.status || 'active'}>{(provider.status || 'active').toUpperCase()}</Badge>} />
-          <DetailRow label="Address" value={provider.address} />
-          <DetailRow label="City / State" value={`${provider.city || ''}, ${provider.state || 'Lagos'}`} />
-          <DetailRow label="Phone" value={provider.phone} />
-          <DetailRow label="Email" value={provider.email} />
-          <DetailRow label="Contact Person" value={provider.contact_person} />
+          <DetailRow label="Empanelment Tier" value={String(p.tier || 'Tier 1')} />
+          <DetailRow label="License Number" value={p.license_number || 'NHIA-LIC-2024'} />
+          <DetailRow label="NHIA Accreditation" value={p.accreditation_number || 'NHIA-ACCR-889'} />
+          <DetailRow label="Status" value={<Badge status={p.status || 'active'}>{(p.status || 'active').toUpperCase()}</Badge>} />
+          <DetailRow label="Address" value={p.address} />
+          <DetailRow label="City / State" value={`${p.city || ''}, ${p.state || 'Lagos'}`} />
+          <DetailRow label="Phone" value={p.phone} />
+          <DetailRow label="Email" value={p.email} />
+          <DetailRow label="Contact Person" value={p.contact_person} />
         </dl>
       </Card>
 
       <Card title="Banking & Settlement Details">
         <dl className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <DetailRow label="Bank Name" value={provider.bank_name || 'First Bank Nigeria'} />
-          <DetailRow label="Account Number" value={provider.account_number || '1029384756'} />
-          <DetailRow label="Account Name" value={provider.account_name || provider.name} />
+          <DetailRow label="Bank Name" value={p.bank_name || 'First Bank Nigeria'} />
+          <DetailRow label="Account Number" value={p.account_number || '1029384756'} />
+          <DetailRow label="Account Name" value={p.account_name || p.name} />
         </dl>
       </Card>
     </div>
@@ -181,10 +292,10 @@ export default function ProviderDetail() {
     { id: 'details', label: 'Details', content: detailsContent },
     {
       id: 'locations',
-      label: `Locations (${(provider.locations || []).length})`,
+      label: `Locations (${(p.locations || []).length})`,
       content: (
         <Card title="Operating Facility Locations">
-          <Table columns={locationColumns} data={provider.locations || []} emptyMessage="No locations found for this provider." />
+          <Table columns={locationColumns} data={p.locations || []} emptyMessage="No locations found for this provider." />
         </Card>
       ),
     },
@@ -209,15 +320,15 @@ export default function ProviderDetail() {
   ];
 
   return (
-    <Layout title={provider.name} subtitle={`Healthcare Provider (${provider.provider_type || 'Facility'})`}>
+    <Layout title={p.name} subtitle={`Healthcare Provider (${p.provider_type || 'Facility'})`}>
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <button onClick={() => navigate('/providers')} className="text-sm text-gray-500 hover:text-gray-700">
             ← Back to Providers
           </button>
           <div className="flex items-center gap-3">
-            <Badge status={provider.status || 'active'}>
-              {(provider.status || 'active').toUpperCase()}
+            <Badge status={p.status || 'active'}>
+              {(p.status || 'active').toUpperCase()}
             </Badge>
             <Button variant="outline" onClick={() => navigate(`/providers/${id}/edit`)}>
               Edit Provider

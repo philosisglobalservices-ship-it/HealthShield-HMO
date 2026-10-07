@@ -77,7 +77,9 @@ const getById = asyncHandler(async (req, res) => {
     if (result.rows[0]) return res.json({ success: true, data: result.rows[0] });
   } catch (err) {}
 
-  const mock = MOCK_MEMBERS.find(m => m.id === req.params.id) || MOCK_MEMBERS[0];
+  const reqId = String(req.params.id || '');
+  const cleanId = reqId.replace('mem-', '');
+  const mock = MOCK_MEMBERS.find(m => m.id === reqId || m.id === `mem-${cleanId}` || m.id.replace('mem-', '') === cleanId || m.member_number === reqId) || MOCK_MEMBERS[0];
   res.json({ success: true, data: mock, _demo: true });
 });
 
