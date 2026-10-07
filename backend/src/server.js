@@ -9,10 +9,14 @@ const { errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
-// ── Security ──────────────────────────────────────────────────────────────────
-app.use(helmet());
+// ── Security & CORS ───────────────────────────────────────────────────────────
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+}));
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: true,
   credentials: true,
 }));
 
@@ -24,10 +28,11 @@ const limiter = rateLimit({
   legacyHeaders: false,
   message: { success: false, message: 'Too many requests — please try again later' },
 });
+
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 20, // Strict for auth endpoints
-  message: { success: false, message: 'Too many login attempts — please wait 15 minutes' },
+  max: 50,
+  message: { success: false, message: 'Too many login attempts — please wait a few minutes' },
 });
 
 app.use('/api/', limiter);
@@ -53,12 +58,14 @@ app.use((req, res) => {
 // ── Global error handler ──────────────────────────────────────────────────────
 app.use(errorHandler);
 
-// ── Start ─────────────────────────────────────────────────────────────────────
-const PORT = parseInt(process.env.PORT || '5000');
-app.listen(PORT, () => {
-  console.log(`\n🚀 HealthShield HMO API running in ${process.env.NODE_ENV || 'development'} mode`);
-  console.log(`   Local:   http://localhost:${PORT}/api/health`);
-  console.log(`   Auth:    POST http://localhost:${PORT}/api/auth/login\n`);
-});
+// ── Start (only if executed directly, not when imported as serverless handler) ─
+if (require.main === module) {
+  const PORT = parseInt(process.env.PORT || '5000');
+  app.listen(PORT, () => {
+    console.log(`\n🚀 HealthShield HMO API running in ${process.env.NODE_ENV || 'development'} mode`);
+    console.log(`   Local:   http://localhost:${PORT}/api/health`);
+    console.log(`   Auth:    POST http://localhost:${PORT}/api/auth/login\n`);
+  });
+}
 
 module.exports = app;
