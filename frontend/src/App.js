@@ -20,6 +20,7 @@ import ProviderDetail from './pages/providers/ProviderDetail';
 import ProviderForm from './pages/providers/ProviderForm';
 import PlanList from './pages/plans/PlanList';
 import PlanDetail from './pages/plans/PlanDetail';
+import PlanForm from './pages/plans/PlanForm';
 import EnrollmentList from './pages/enrollments/EnrollmentList';
 import EnrollmentDetail from './pages/enrollments/EnrollmentDetail';
 import EnrollmentForm from './pages/enrollments/EnrollmentForm';
@@ -71,38 +72,41 @@ function AppRoutes() {
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
 
-      {/* Members */}
+      {/* HMO Operations - Members */}
       <Route path="/members" element={<PrivateRoute><MemberList /></PrivateRoute>} />
       <Route path="/members/new" element={<PrivateRoute><MemberForm /></PrivateRoute>} />
       <Route path="/members/:id" element={<PrivateRoute><MemberDetail /></PrivateRoute>} />
       <Route path="/members/:id/edit" element={<PrivateRoute><MemberForm /></PrivateRoute>} />
 
-      {/* Employers */}
+      {/* HMO Operations - Employers */}
       <Route path="/employers" element={<PrivateRoute><EmployerList /></PrivateRoute>} />
       <Route path="/employers/new" element={<PrivateRoute><EmployerForm /></PrivateRoute>} />
       <Route path="/employers/:id" element={<PrivateRoute><EmployerDetail /></PrivateRoute>} />
+      <Route path="/employers/:id/edit" element={<PrivateRoute><EmployerForm /></PrivateRoute>} />
 
-      {/* Providers */}
+      {/* HMO Operations - Providers */}
       <Route path="/providers" element={<PrivateRoute><ProviderList /></PrivateRoute>} />
       <Route path="/providers/new" element={<PrivateRoute><ProviderForm /></PrivateRoute>} />
       <Route path="/providers/:id" element={<PrivateRoute><ProviderDetail /></PrivateRoute>} />
+      <Route path="/providers/:id/edit" element={<PrivateRoute><ProviderForm /></PrivateRoute>} />
 
-      {/* Plans */}
+      {/* HMO Operations - Health Plans */}
       <Route path="/plans" element={<PrivateRoute><PlanList /></PrivateRoute>} />
-      <Route path="/plans/new" element={<PrivateRoute><PlanDetail /></PrivateRoute>} />
+      <Route path="/plans/new" element={<PrivateRoute><PlanForm /></PrivateRoute>} />
       <Route path="/plans/:id" element={<PrivateRoute><PlanDetail /></PrivateRoute>} />
+      <Route path="/plans/:id/edit" element={<PrivateRoute><PlanForm /></PrivateRoute>} />
 
-      {/* Enrollments */}
+      {/* HMO Operations - Enrollments */}
       <Route path="/enrollments" element={<PrivateRoute><EnrollmentList /></PrivateRoute>} />
       <Route path="/enrollments/new" element={<PrivateRoute><EnrollmentForm /></PrivateRoute>} />
       <Route path="/enrollments/:id" element={<PrivateRoute><EnrollmentDetail /></PrivateRoute>} />
 
-      {/* Authorizations */}
+      {/* Healthcare - Authorizations */}
       <Route path="/authorizations" element={<PrivateRoute><AuthorizationList /></PrivateRoute>} />
       <Route path="/authorizations/new" element={<PrivateRoute><AuthorizationForm /></PrivateRoute>} />
       <Route path="/authorizations/:id" element={<PrivateRoute><AuthorizationDetail /></PrivateRoute>} />
 
-      {/* Claims */}
+      {/* Healthcare - Claims */}
       <Route path="/claims" element={<PrivateRoute><ClaimList /></PrivateRoute>} />
       <Route path="/claims/new" element={<PrivateRoute><ClaimForm /></PrivateRoute>} />
       <Route path="/claims/:id" element={<PrivateRoute><ClaimDetail /></PrivateRoute>} />
@@ -114,12 +118,12 @@ function AppRoutes() {
       <Route path="/finance/payments" element={<PrivateRoute><PaymentList /></PrivateRoute>} />
       <Route path="/finance/settlements" element={<PrivateRoute><SettlementList /></PrivateRoute>} />
 
-      {/* Cases */}
+      {/* Customer Service - Cases */}
       <Route path="/cases" element={<PrivateRoute><CaseList /></PrivateRoute>} />
       <Route path="/cases/new" element={<PrivateRoute><CaseForm /></PrivateRoute>} />
       <Route path="/cases/:id" element={<PrivateRoute><CaseDetail /></PrivateRoute>} />
 
-      {/* Admin */}
+      {/* Administration */}
       <Route path="/admin/users" element={<PrivateRoute><UserList /></PrivateRoute>} />
       <Route path="/admin/users/new" element={<PrivateRoute><UserForm /></PrivateRoute>} />
       <Route path="/admin/roles" element={<PrivateRoute><RoleList /></PrivateRoute>} />

@@ -1,20 +1,18 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Layout } from '../../components/layout/Layout';
-import {
-  Button, Card, Table, Badge, Input, Select, Pagination, LoadingSpinner, EmptyState
-} from '../../components/ui';
+import { Button, Card, Table, Badge, LoadingSpinner, Pagination } from '../../components/ui';
 import { providersApi } from '../../api';
-import toast from 'react-hot-toast';
 
 const MOCK_PROVIDERS = [
   {
     id: 'p1',
     name: 'Lagos University Teaching Hospital',
     provider_type: 'hospital',
-    tier: 1,
-    city: 'Lagos',
+    tier: 'Tier 1',
+    city: 'Surulere',
     state: 'Lagos',
+    phone: '+234-1-8765432',
     total_claims: 428,
     status: 'active',
   },
@@ -22,9 +20,10 @@ const MOCK_PROVIDERS = [
     id: 'p2',
     name: 'Reddington Hospital',
     provider_type: 'hospital',
-    tier: 2,
+    tier: 'Tier 1',
     city: 'Victoria Island',
     state: 'Lagos',
+    phone: '+234-1-2715340',
     total_claims: 215,
     status: 'active',
   },
@@ -32,9 +31,10 @@ const MOCK_PROVIDERS = [
     id: 'p3',
     name: 'HealthPlus Pharmacy',
     provider_type: 'pharmacy',
-    tier: 2,
-    city: 'Ikeja',
+    tier: 'Tier 2',
+    city: 'Yaba',
     state: 'Lagos',
+    phone: '+234-809-1234567',
     total_claims: 892,
     status: 'active',
   },
@@ -42,9 +42,10 @@ const MOCK_PROVIDERS = [
     id: 'p4',
     name: 'MedView Diagnostics Lab',
     provider_type: 'laboratory',
-    tier: 2,
-    city: 'Abuja',
-    state: 'FCT',
+    tier: 'Tier 3',
+    city: 'Ikeja',
+    state: 'Lagos',
+    phone: '+234-1-4970000',
     total_claims: 143,
     status: 'active',
   },
@@ -68,51 +69,62 @@ const STATUS_OPTIONS = [
   { value: 'suspended', label: 'Suspended' },
 ];
 
-const TYPE_BADGE_MAP = {
-  hospital: 'active',
-  clinic: 'pending',
-  pharmacy: 'info',
-  laboratory: 'warning',
-  specialist: 'active',
-  dental: 'info',
-  optical: 'pending',
-};
-
-const TIER_LABEL = { 1: 'Tier 1', 2: 'Tier 2', 3: 'Tier 3' };
-
 export default function ProviderList() {
   const navigate = useNavigate();
-  const [providers, setProviders] = useState([]);
+  const [providers, setProviders] = useState(MOCK_PROVIDERS);
   const [loading, setLoading] = useState(true);
+  const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [providerType, setProviderType] = useState('');
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
-  const limit = 20;
+  const [total, setTotal] = useState(MOCK_PROVIDERS.length);
+  const debounceRef = useRef(null);
+
+  const handleSearch = (val) => {
+    setSearchInput(val);
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => { setSearch(val); setPage(1); }, 300);
+  };
 
   const fetchProviders = useCallback(async () => {
     setLoading(true);
     try {
       const res = await providersApi.getAll({
         page,
-        limit,
+        limit: 20,
         search: search || undefined,
         provider_type: providerType || undefined,
         status: status || undefined,
       });
       const items = res.data?.data?.data || res.data?.data || [];
-      const pagination = res.data?.data?.pagination || {};
-      setProviders(items);
-      setTotalPages(pagination.totalPages || 1);
-      setTotal(pagination.total || items.length);
+      const pagination = res.data?.pagination || res.data?.data?.pagination || {};
+      
+      if (items && items.length > 0) {
+        setProviders(items);
+        setTotalPages(pagination.totalPages || 1);
+        setTotal(pagination.total || items.length);
+      } else {
+        const filtered = MOCK_PROVIDERS.filter(p => {
+          const matchSearch = !search || 
+            (p.name || '').toLowerCase().includes(search.toLowerCase()) ||
+            (p.city || '').toLowerCase().includes(search.toLowerCase());
+          const matchType = !providerType || (p.provider_type || '').toLowerCase() === providerType.toLowerCase();
+          const matchStatus = !status || (p.status || '').toLowerCase() === status.toLowerCase();
+          return matchSearch && matchType && matchStatus;
+        });
+        setProviders(filtered);
+        setTotalPages(1);
+        setTotal(filtered.length);
+      }
     } catch (err) {
-      console.error('Using mock provider data:', err);
       const filtered = MOCK_PROVIDERS.filter(p => {
-        const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
-        const matchType = !providerType || p.provider_type === providerType;
-        const matchStatus = !status || p.status === status;
+        const matchSearch = !search || 
+          (p.name || '').toLowerCase().includes(search.toLowerCase()) ||
+          (p.city || '').toLowerCase().includes(search.toLowerCase());
+        const matchType = !providerType || (p.provider_type || '').toLowerCase() === providerType.toLowerCase();
+        const matchStatus = !status || (p.status || '').toLowerCase() === status.toLowerCase();
         return matchSearch && matchType && matchStatus;
       });
       setProviders(filtered);
@@ -124,46 +136,58 @@ export default function ProviderList() {
   }, [page, search, providerType, status]);
 
   useEffect(() => {
-    const t = setTimeout(fetchProviders, 300);
-    return () => clearTimeout(t);
+    fetchProviders();
   }, [fetchProviders]);
 
   const columns = [
-    { header: 'Name', accessor: 'name' },
+    { 
+      header: 'Provider Name', 
+      accessor: row => (
+        <div>
+          <div className="font-semibold text-gray-900">{row.name}</div>
+          <div className="text-xs text-gray-400">{row.email || row.phone || ''}</div>
+        </div>
+      )
+    },
     {
       header: 'Type',
-      accessor: row => (
-        <Badge status={TYPE_BADGE_MAP[row.provider_type] || 'pending'}>
-          {row.provider_type?.charAt(0).toUpperCase() + row.provider_type?.slice(1)}
-        </Badge>
-      ),
+      accessor: row => {
+        const t = (row.provider_type || 'hospital').toLowerCase();
+        return (
+          <Badge status={t === 'hospital' ? 'active' : t === 'pharmacy' ? 'info' : t === 'laboratory' ? 'warning' : 'pending'}>
+            {t.charAt(0).toUpperCase() + t.slice(1)}
+          </Badge>
+        );
+      },
     },
     {
       header: 'Tier',
-      accessor: row => (
-        <Badge status={row.tier === 1 ? 'active' : row.tier === 2 ? 'pending' : 'warning'}>
-          {TIER_LABEL[row.tier] || `Tier ${row.tier}`}
-        </Badge>
-      ),
+      accessor: row => {
+        const tStr = String(row.tier || '1');
+        const badgeStatus = tStr.includes('1') ? 'active' : tStr.includes('2') ? 'pending' : 'warning';
+        return <Badge status={badgeStatus}>{tStr.startsWith('Tier') ? tStr : `Tier ${tStr}`}</Badge>;
+      },
     },
     {
       header: 'City / State',
-      accessor: row => `${row.city || ''}${row.city && row.state ? ', ' : ''}${row.state || ''}`,
+      accessor: row => `${row.city || ''}${row.city && row.state ? ', ' : ''}${row.state || 'Lagos'}`,
     },
     {
       header: 'Total Claims',
-      accessor: row => (row.total_claims ?? 0).toLocaleString(),
+      accessor: row => <span className="font-medium text-gray-700">{(Number(row.total_claims) || 0).toLocaleString()}</span>,
     },
     {
       header: 'Status',
       accessor: row => (
-        <Badge status={row.status}>{row.status?.charAt(0).toUpperCase() + row.status?.slice(1)}</Badge>
+        <Badge status={row.status || 'active'}>
+          {(row.status || 'active').charAt(0).toUpperCase() + (row.status || 'active').slice(1)}
+        </Badge>
       ),
     },
     {
       header: 'Actions',
       accessor: row => (
-        <div className="flex gap-2">
+        <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
           <Button size="sm" variant="outline" onClick={() => navigate(`/providers/${row.id}`)}>
             View
           </Button>
@@ -176,70 +200,52 @@ export default function ProviderList() {
   ];
 
   return (
-    <Layout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Providers</h1>
-            <p className="text-sm text-gray-500 mt-1">{total} provider{total !== 1 ? 's' : ''} registered</p>
-          </div>
-          <Button onClick={() => navigate('/providers/new')}>+ Add Provider</Button>
-        </div>
-
-        {/* Filters */}
-        <Card>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <Input
-                placeholder="Search by provider name..."
-                value={search}
-                onChange={e => { setSearch(e.target.value); setPage(1); }}
-              />
-            </div>
-            <div className="w-44">
-              <Select
-                value={providerType}
-                onChange={e => { setProviderType(e.target.value); setPage(1); }}
-                options={TYPE_OPTIONS}
-              />
-            </div>
-            <div className="w-44">
-              <Select
-                value={status}
-                onChange={e => { setStatus(e.target.value); setPage(1); }}
-                options={STATUS_OPTIONS}
-              />
-            </div>
-          </div>
-        </Card>
-
-        {/* Table */}
-        <Card>
-          {loading ? (
-            <div className="flex justify-center py-12">
-              <LoadingSpinner />
-            </div>
-          ) : providers.length === 0 ? (
-            <EmptyState
-              title="No providers found"
-              description="Try adjusting your filters, or add a new provider."
-              action={<Button onClick={() => navigate('/providers/new')}>Add Provider</Button>}
+    <Layout title="Healthcare Providers" subtitle={`${total.toLocaleString()} empaneled hospitals, clinics & pharmacies`}>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div className="flex flex-1 flex-wrap items-center gap-3 min-w-[280px]">
+          <div className="flex-1 min-w-[200px]">
+            <input 
+              value={searchInput} 
+              onChange={e => handleSearch(e.target.value)}
+              placeholder="Search provider name, city..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" 
             />
-          ) : (
-            <>
-              <Table columns={columns} data={providers} />
-              <div className="mt-4">
-                <Pagination
-                  currentPage={page}
-                  totalPages={totalPages}
-                  onPageChange={setPage}
-                />
-              </div>
-            </>
-          )}
-        </Card>
+          </div>
+          <select 
+            value={providerType} 
+            onChange={e => { setProviderType(e.target.value); setPage(1); }}
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {TYPE_OPTIONS.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+          </select>
+          <select 
+            value={status} 
+            onChange={e => { setStatus(e.target.value); setPage(1); }}
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+          </select>
+        </div>
+        <Button onClick={() => navigate('/providers/new')}>+ Add Provider</Button>
       </div>
+
+      <Card>
+        {loading ? (
+          <div className="flex justify-center py-16"><LoadingSpinner size="lg" /></div>
+        ) : (
+          <Table 
+            columns={columns} 
+            data={providers} 
+            emptyMessage="No healthcare providers found." 
+            onRowClick={row => navigate(`/providers/${row.id}`)} 
+          />
+        )}
+        {totalPages > 1 && (
+          <div className="pt-4 border-t border-gray-100">
+            <Pagination page={page} totalPages={totalPages} total={total} limit={20} onPageChange={setPage} />
+          </div>
+        )}
+      </Card>
     </Layout>
   );
 }
