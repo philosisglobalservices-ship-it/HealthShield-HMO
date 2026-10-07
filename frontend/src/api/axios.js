@@ -2,8 +2,9 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
   headers: { 'Content-Type': 'application/json' },
+  timeout: 10000,
 });
 
 // Request interceptor — attach token
@@ -28,10 +29,6 @@ api.interceptors.response.use(
       }
     } else if (error.response?.status === 403) {
       toast.error('Access denied — insufficient permissions');
-    } else if (error.response?.status >= 500) {
-      toast.error('Server error — please try again later');
-    } else if (!error.response) {
-      toast.error('Network error — check your connection');
     }
     return Promise.reject(error);
   }
